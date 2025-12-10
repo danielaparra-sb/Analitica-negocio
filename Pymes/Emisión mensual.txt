@@ -1,0 +1,51 @@
+WITH BASE_1 AS (
+    SELECT * EXCEPT(NUMERO_POLIZA, NOMBRE_PRODUCTO, NUMERO_POLIZA_MADRE, VALOR_ASEGURADO, PRIMA_EMITIDA,
+                    CODIGO_PRODUCTO, NUMERO_SECUENCIA_POLIZA,MARCA_REFERIDO,MONEDA,FECHA_EQUIPO),
+        DATE(FECHA_EQUIPO) AS FECHA_EQUIPO,
+        NUMERO_SECUENCIA_POLIZA,
+        NUMERO_POLIZA AS NUMERO_POLIZA_HIJA,
+        NUMERO_POLIZA_MADRE,
+        CASE
+            WHEN NUMERO_POLIZA_MADRE IS NULL OR NUMERO_POLIZA_MADRE = 0
+            THEN SAFE_CAST(NUMERO_POLIZA AS STRING) 
+            ELSE SAFE_CAST(NUMERO_POLIZA_MADRE AS STRING)
+        END AS NUMERO_POLIZA,
+        CASE
+            WHEN NUMERO_POLIZA_MADRE IS NULL OR NUMERO_POLIZA_MADRE = 0 
+            THEN 'PH' 
+            ELSE 'PP' 
+        END AS TIPO_POLIZA,
+        MARCA_REFERIDO,
+        SAFE_CAST(CODIGO_PRODUCTO AS STRING) AS CODIGO_PRODUCTO,
+        -- Tipo documento tomador
+        CASE 
+            WHEN TIPO_DOCUMENTO_TOMADOR IN ('NT', 'NN', 'NM', 'NE', 'NC') 
+            THEN 'PJ' 
+            ELSE 'PN' 
+        END AS TIPO_PERSONA_TOMADOR,
+        -- Tipo documento asegurado
+        CASE 
+            WHEN TIPO_DOCUMENTO_ASEGURADO IN ('NT', 'NN', 'NM', 'NE', 'NC') 
+            THEN 'PJ' 
+            ELSE 'PN' 
+        END AS TIPO_PERSONA_ASEGURADO,
+        -- Prima emitida
+        CASE 
+            WHEN (PRIMA_EMITIDA_BOLIVAR IS NULL OR PRIMA_EMITIDA_BOLIVAR = 0) AND (PRIMA_EMITIDA IS NOT NULL OR PRIMA_EMITIDA != 0) 
+            THEN PRIMA_EMITIDA 
+            ELSE PRIMA_EMITIDA_BOLIVAR 
+        END AS PRIMA_EMITIDA
+    FROM sb-sandbox-actuaria-generales.sandbox_patrimonial.t_polizas_riesgos_endosos_EMPRESAS 
+    WHERE CODIGO_PRODUCTO IN (1,75,76,91,93,94,95,97,98,173,777,778)
+        AND FECHA_EQUIPO >= '2025-01-01' AND DATE(FECHA_EQUIPO) <= '2025-11-30'
+        )
+
+SELECT EXTRACT(MONTH FROM FECHA_EQUIPO) AS MES, 
+COUNT(DISTINCT KEY_ID_ASEGURADO) AS ASEGURADOS, COUNT(DISTINCT NUMERO_POLIZA) AS POLIZAS
+FROM BASE_1
+GROUP BY 1
+
+
+-- FROM `sb-sandbox-actuaria-generales.sandbox_patrimonial.t_polizas_riesgos_endosos_EMPRESAS`
+
+-- FROM `sb-ecosistemaanalitico-lago.seguros_bolivar.t_resultados_comerciales`

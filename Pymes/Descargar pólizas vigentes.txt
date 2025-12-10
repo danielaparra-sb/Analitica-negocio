@@ -1,0 +1,25 @@
+SELECT EXTRACT(MONTH FROM FECHA_CORTE) AS MES, 
+  COUNT(DISTINCT KEY_ID_ASEGURADO) AS ASEGURADOS, 
+  COUNT(DISTINCT NUMERO_SECUENCIA_POLIZA) AS POLIZAS
+  FROM sb-ecosistemaanalitico-lago.seguros_bolivar.t_polizas_tom_ase_vigentes
+  WHERE CODIGO_COMPANIA = 3
+    AND NUMERO_SECUENCIA_POLIZA IN (
+      SELECT NUMERO_SECUENCIA_POLIZA
+      FROM sb-sandbox-actuaria-generales.sandbox_patrimonial.t_polizas_riesgos_endosos_EMPRESAS
+      -- CUMPLIMIENTO ============================
+      --WHERE CODIGO_RAMO_CONTABLE IN (4,476,477)
+     -- AND CODIGO_PRODUCTO IN (440,444,450,455,460,470,480,481)
+      -- RC ======================================
+      --WHERE CODIGO_RAMO_CONTABLE IN (10)
+      --AND CODIGO_PRODUCTO IN (214,215,217,218,219,220,225,248)
+      -- TRANSPORTE ==============================
+      --WHERE CODIGO_RAMO_CONTABLE IN (15)
+      --AND CODIGO_PRODUCTO IN (40, 45)
+      -- PROPIEDAD ===============================
+      --WHERE CODIGO_RAMO_CONTABLE IN (13, 5, 6)
+      --AND CODIGO_PRODUCTO IN (1, 75, 76)
+      -- PYMES ===================================
+      WHERE CODIGO_PRODUCTO IN (777,778,91,93,95,97,94,98,173)
+      AND MARCA_REFERIDO = "N"
+    ) AND FECHA_CORTE BETWEEN '2024-01-01' AND '2024-11-30'
+    GROUP BY 1
