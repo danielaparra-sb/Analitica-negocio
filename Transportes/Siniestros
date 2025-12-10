@@ -1,0 +1,33 @@
+SELECT 
+    -- Identificación de la Póliza
+    NUMERO_POLIZA_MADRE,
+    NUMERO_POLIZA,
+    NUMERO_SECUENCIA_POLIZA AS POLIZA_HIJA_CERTIFICADO, -- Equivale al certificado o hija
+    
+    -- Detalle del Siniestro
+    NUMERO_SINIESTRO,
+    ESTADO_SINIESTRO,       -- A veces aparece como CODIGO_ESTADO_SINIESTRO
+    DESCRIPCION_CAUSA,      -- Causa del siniestro
+    NOMBRE_COBERTURA,
+
+    -- Fechas
+    DATE(FECHA_MOVIMIENTO) AS FECHA_MOVIMIENTO,
+    
+    -- Valores (Incurrido)
+    -- Asumiendo que quieres el valor del movimiento específico en esa fecha:
+    SUM(INCURRIDO_BOLIVAR) AS INCURRIDO_BOLIVAR,
+    SUM(LIQUIDADO_BOLIVAR) AS LIQUIDADO_BOLIVAR,
+    SUM(INCURRIDO_COASEGURO) AS INCURRIDO_COASEGURO,
+    SUM(LIQUIDADO_BOLIVAR) AS LIQUIDADO_BOLIVAR, 
+
+FROM `sb-ecosistemaanalitico-lago.seguros_bolivar.t_siniestros`
+
+WHERE 
+    -- 1. Filtro de Ramo y Producto
+    CODIGO_RAMO_CONTABLE = 15 
+    AND CODIGO_PRODUCTO IN (40, 45)
+    
+    -- 2. Filtro de Fechas (Enero 2022 a Noviembre 2025)
+    AND DATE(FECHA_MOVIMIENTO) BETWEEN '2022-01-01' AND '2025-11-30'
+    
+GROUP BY ALL
