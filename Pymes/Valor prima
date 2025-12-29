@@ -1,0 +1,3 @@
+select sum (PRIMA_ENDOSO_GENERAL) from  `sb-ecosistemaanalitico-lago.datamart.t_produccion_detalle` 
+where codigo_producto in (777,778)
+and fecha_cierre = '2025-12-28'
